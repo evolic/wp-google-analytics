@@ -105,7 +105,7 @@ if ( ! class_exists( 'GA_Admin' ) ) {
 
 		function success() {
 			echo "
-			<div id='analytics-warning' class='updated fade-ff0000'><p><strong>Gratulacje! Właśnie aktywowano Twoje konto na Google Analytics. Jeśli chcesz, przyjrzyj się źródłu Twojej strony i poszukaj w nim słowa 'urchin' aby zaobserwować zmiany.</p></div>
+			<div id='analytics-warning' class='updated fade-ff0000'><p><strong>Gratulacje! Właśnie aktywowano Twoje konto na Google Analytics. Jeśli chcesz, przyjrzyj się źródłu Twojej strony i poszukaj w nim słowa 'google-analytics.com' aby zaobserwować zmiany.</p></div>
 			<style type='text/css'>
 			#adminmenu { margin-bottom: 7em; }
 			#analytics-warning { position: absolute; top: 7em; }
@@ -186,15 +186,18 @@ if ( ! class_exists( 'GA_Filter' ) ) {
 		function spool_this($ua) {
 			global $version, $includeUDN;
 
-			echo("<script>\n");
-			echo("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){\n");
-			echo("    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),\n");
-			echo("    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)\n");
-			echo("})(window,document,'script','//www.google-analytics.com/analytics.js','ga');\n");
-			echo("\n");
-			echo("ga('create', '$ua', '{$_SERVER['HTTP_HOST']}');\n");
-			echo("ga('send', 'pageview');\n");
-			echo("</script>\n");
+			// Don't track pages in preview mode
+			if (!array_key_exists('preview', $_GET) || !$_GET['preview']) {
+				echo("<script type='text/javascript'>\n");
+				echo("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){\n");
+				echo("	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),\n");
+				echo("	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)\n");
+				echo("})(window,document,'script','//www.google-analytics.com/analytics.js','ga');\n");
+				echo("\n");
+				echo("ga('create', '$ua', '{$_SERVER['HTTP_HOST']}');\n");
+				echo("ga('send', 'pageview');\n");
+				echo("</script>\n");
+			}
 		}
 
 		/* Create an array which contians:
