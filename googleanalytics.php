@@ -4,8 +4,10 @@ Plugin Name: Google Analytics
 Plugin URI: http://boakes.org/analytics
 Description: Wtyczka ułatwiająca dodanie funkcji Google Analytics do Twojego bloga WordPress lub forum BBPress.
 Author: Rich Boakes
-Version: 0.68
+Contributor: Tomasz Kuter
+Version: 0.70
 Author URI: http://boakes.org
+Contributor URI: https://github.com/evolic/wp-google-analytics
 Translator: Bartosz "brt12" Sobczyk
 Translator URI: http://www.brt12.eu
 License: GPL
@@ -37,6 +39,7 @@ License: GPL
          dependent on the speed of the google server.
 0.67 - * Security fix for multiple author blogs.
 0.68 - * Allow longer UA strings.
+0.70 - * Added support for new tracking code: www.google-analytics.com/analytics.js
 */
 
 $uastring = "UA-00000-0";
@@ -73,7 +76,7 @@ if ( ! class_exists( 'GA_Admin' ) ) {
 				<p>Google Analytics to usługa statystyk dostarczana za darmo przez Google. Ta wtyczka ułatwia proces wstawiania <em>podstawowego</em> kodu Google Analytics na Twoim blogu, tak że nie musisz edytować żadnych plików PHP. Jeżeli nie masz jeszcze konta na Google Analytics, możesz je założyć na stronie <a href="https://www.google.com/analytics/home/">analytics.google.com</a>.</p>
 
 				<p>W interfejsie Google gdy wybierasz opcję "Dodaj profil strony", ukaże Ci sie kod JavaScript, który należy umieścić na stronie. W tym kodzie znajduje się fragment, który identyfikuje stronę, która własnie została przez Ciebie dodana (jest on <strong>pogrubiony</strong> w przykładzie poniżej).</p>
-				<tt>&lt;script src="http://www.google-analytics.com/urchin.js" type="text/javascript"&gt;<br />&lt;/script&gt;<br />&lt;script type="text/javascript"&gt;<br />_uacct = "<strong><?php echo($mulch);?></strong>";<br />urchinTracker();<br />&lt;/script&gt;<br /></tt>
+				<tt>&lt;script&gt;<br />(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){<br />(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),<br />m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)<br />})(window,document,'script','//www.google-analytics.com/analytics.js','ga');<br /><br />ga('create', '<strong><?php echo($mulch);?></strong>', 'eu5.org');<br />ga('send', 'pageview');<br />&lt;/script&gt;<br /></tt>
 
 				<p>Gdy już wpiszesz swój kod UA (użytkownika), wówczas twoje strony będą śledzone przez Google Analytics.</p>
 
@@ -182,13 +185,16 @@ if ( ! class_exists( 'GA_Filter' ) ) {
 		 */
 		function spool_this($ua) {
 			global $version, $includeUDN;
-			echo("<script src=\"http://www.google-analytics.com/urchin.js\" type=\"text/javascript\">\n");
+
+			echo("<script>\n");
+			echo("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){\n");
+			echo("    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),\n");
+			echo("    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)\n");
+			echo("})(window,document,'script','//www.google-analytics.com/analytics.js','ga');\n");
+			echo("\n");
+			echo("ga('create', '$ua', '{$_SERVER['HTTP_HOST']}');\n");
+			echo("ga('send', 'pageview');\n");
 			echo("</script>\n");
-			echo("<script type=\"text/javascript\">\n");
-			echo("_uacct = \"$ua\";\n");
-			if ($includeUDN) echo("_udn = ".$_SERVER['HTTP_HOST']."\n");
-			echo("urchinTracker();\n");
-			echo("</script>\n\n");
 		}
 
 		/* Create an array which contians:
